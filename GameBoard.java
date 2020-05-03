@@ -1,43 +1,53 @@
 public class GameBoard {
 	private int[][] grid; 						// the grid that stores the pieces
-	private int currentPlayer;
+	private int currentPlayer, otherPlayer;
+	private int[] color_count;
 
 	public GameBoard(int width, int height) {
 		grid = new int[height][width];
 		currentPlayer = 1;
+		otherPlayer = 2;
+		color_count = new int[]{width * height, 0, 0};
 
 		// Initialize starting positions
-		grid[0][0] = 1;
-		grid[grid.length - 1][grid[0].length - 1] = 1;
-		grid[grid.length - 1][0] = 2;
-		grid[0][grid[0].length - 1] = 2;
-
+		setCell(0, 0, 1);
+		setCell(grid.length - 1, grid[0].length - 1, 1);
+		setCell(grid.length - 1, 0, 2);
+		setCell(0, grid[0].length - 1, 2);
 	}
 
 	// Make the requested move at (row, col) by changing the grid.
-	// returns false if no move was made, true if the move was successful.
 	public boolean move(int startRow, int startCol, int targetRow, int targetCol) {
 		System.out.print("[DEBUGGING INFO] You tried to move FROM " + startRow + ", " + startCol);
 		System.out.println(" TO " + targetRow + ", " + targetCol);
 
-		// check if move is not valid.  If so, return false.
+		// return false if move is not valid
 		if ( distance(startRow, startCol, targetRow, targetCol) < 1) {
 			return false;
 		}
 
-		grid[targetRow][targetCol] = currentPlayer;
+		setCell(targetRow, targetCol, currentPlayer);
 		if ( distance(startRow, startCol, targetRow, targetCol) == 2) {
-			grid[startRow][startCol] = 0;
+			setCell(startRow, startCol, 0);
 		}
 
-		switchPlayerTurn();
+		System.out.println("Score: Player1=" + color_count[1] + " Player2=" + color_count[2]);
 
-		return true; // if move was valid, return true
+		return true; // move was valid
 	}
 
+	public void infectOpponent(int row, int col) {
+		for (int r = row-1; r < row+2; r++) {
+			for (int c = col-1; c < col+2; c++) {
+				if ( isInGrid(r, c) && grid[r][c] == otherPlayer ) {
+					setCell(r, c, currentPlayer);
+				}
+			}
+		}
+		switchPlayerTurn();
+	}
 
 	public static int distance(int startRow, int startCol, int targetRow, int targetCol) {
-		int distance = 0;
 		int delta_row = targetRow - startRow;
 		int delta_col = targetCol - startCol;
 
@@ -52,18 +62,27 @@ public class GameBoard {
 		}
 	}
 
-	private void switchPlayerTurn() {
-		currentPlayer = currentPlayer == 1 ? 2 : 1;
+	public void switchPlayerTurn() {
+		int other = otherPlayer;
+		otherPlayer = currentPlayer;
+		currentPlayer = other;
 	}
 
 	/*
-	 * Return true if the game is over. False otherwise.
+	 * Game is over if either:
+	 * - a player has 0 tiles: the other player wins
+	 * - there is more empty cell: the player w/ the most tiles wins
 	 */
-	public boolean isGameOver() {
+	public int isGameOver() {
+		if (color_count[2] == 0) { return 1; }
+		if (color_count[1] == 0) { return 2; }
 
-		/*** YOU COMPLETE THIS METHOD ***/
-
-		return false;
+		if ( color_count[0] == 0) { // no empty cells left
+			if (color_count[1] == color_count[2])     { return 0; } // tie
+			else if (color_count[1] > color_count[2]) { return 1; }
+			else                                      { return 2; }
+		}
+		else { return -1; }  // game is not over
 	}
 
 	public int[][] getGrid() {
@@ -76,16 +95,21 @@ public class GameBoard {
 	}
 
 	public boolean isPlayerAt(int row, int col) {
-		if (!isInGrid(row, col)) {
-			return false;
-		}
-		return grid[row][col] == currentPlayer;
+		return isInGrid(row, col) && grid[row][col] == currentPlayer;
 	}
 
 	public boolean isCellEmpty(int row, int col) {
-		if (!isInGrid(row, col)) {
-			return false;
+		return !isInGrid(row, col) || grid[row][col] == 0;
+	}
+
+	public void setCell(int row, int col, int new_color) {
+		if ( isInGrid(row, col) ) {
+			int cur_color = grid[row][col];
+			if (new_color != cur_color) {
+				grid[row][col] = new_color;
+				color_count[new_color]++;
+				color_count[cur_color]--;
+			}
 		}
-		return grid[row][col] == 0;
 	}
 }

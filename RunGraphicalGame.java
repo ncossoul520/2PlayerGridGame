@@ -12,7 +12,7 @@ public class RunGraphicalGame extends PApplet {
 
 	public void setup() {
 		// Create a game object
-		game = new GameBoard(5, 5);
+		game = new GameBoard(7,7);
 
 		// Create the display
 		// parameters: (10,10) is upper left of display
@@ -33,8 +33,17 @@ public class RunGraphicalGame extends PApplet {
 	@Override
 	public void draw() {
 		background(200);
-
 		display.drawGrid(game.getGrid()); // display the game
+
+		int winner = game.isGameOver();
+		if ( winner != -1 ) {
+			if (winner == 0) {
+				System.out.println("GAME OVER. It's a tie!");
+			} else {
+				System.out.println("Player " + winner + " wins!");
+			}
+			super.stop();
+		}
 	}
 
 	public void mouseReleased() {
@@ -44,7 +53,7 @@ public class RunGraphicalGame extends PApplet {
 
 			// check location
 			if ( !game.isPlayerAt(startLocation.getRow(), startLocation.getCol() )) {
-				System.out.println("[WARNING] Invalid move, try again");
+				System.out.println("[WARNING] Invalid START cell, try again");
 			} else {
 				clickCount++;
 			}
@@ -54,11 +63,17 @@ public class RunGraphicalGame extends PApplet {
 			System.out.println("[DEBUGGING INFO] You clicked at TARGET " + targetLocation.getRow() + ", " + targetLocation.getCol());
 
 			// check location
-			if ( !game.isCellEmpty(targetLocation.getRow(), targetLocation.getCol() )) {
-				System.out.println("[WARNING] Invalid move, try again");
+			if (targetLocation.equals( startLocation )) { // pass my turn
+				System.out.println("Passing your turn. Other's player turn.");
+				game.switchPlayerTurn();
+				clickCount = 1;
+			}
+			else if ( !game.isCellEmpty(targetLocation.getRow(), targetLocation.getCol() )) {
+				System.out.println("[WARNING] Invalid TARGET cell, try again");
 			} else if ( !game.move( startLocation.getRow(), startLocation.getCol(), targetLocation.getRow(), targetLocation.getCol() )) {
-				System.out.println("[WARNING] Invalid move, try again");
+				System.out.println("[WARNING] Invalid TARGET move, try again");
 			} else {
+				game.infectOpponent( targetLocation.getRow(), targetLocation.getCol() );
 				clickCount = 1;
 			}
 		}
