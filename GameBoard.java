@@ -31,8 +31,6 @@ public class GameBoard {
 			setCell(startRow, startCol, 0);
 		}
 
-		System.out.println("Score: Player1=" + color_count[1] + " Player2=" + color_count[2]);
-
 		return true; // move was valid
 	}
 
@@ -44,6 +42,8 @@ public class GameBoard {
 				}
 			}
 		}
+
+		System.out.println("Score: Player1=" + color_count[1] + " Player2=" + color_count[2]);
 		switchPlayerTurn();
 	}
 
