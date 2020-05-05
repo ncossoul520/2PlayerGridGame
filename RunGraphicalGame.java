@@ -17,7 +17,7 @@ public class RunGraphicalGame extends PApplet {
 		// Create the display
 		// parameters: (10,10) is upper left of display
 		// (400, 400) is the width and height
-		display = new Display(this, 10, 10, 400, 400);
+		display = new Display(this, 55, 10, 530, 530);
 
 		display.setColor(0, color(200, 200, 200));  // empty (grey)
 		display.setColor(1, color(255, 0, 0));      // player 1 (red)
