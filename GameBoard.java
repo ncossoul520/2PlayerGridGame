@@ -44,7 +44,6 @@ public class GameBoard {
 		}
 
 		System.out.println("Score: Player1=" + color_count[1] + " Player2=" + color_count[2]);
-		switchPlayerTurn();
 	}
 
 	public static int distance(int startRow, int startCol, int targetRow, int targetCol) {
@@ -77,12 +76,43 @@ public class GameBoard {
 		if (color_count[2] == 0) { return 1; }
 		if (color_count[1] == 0) { return 2; }
 
+		if ( blockedOtherPlayer() ) {
+			return currentPlayer;
+		}
+
 		if ( color_count[0] == 0) { // no empty cells left
 			if (color_count[1] == color_count[2])     { return 0; } // tie
 			else if (color_count[1] > color_count[2]) { return 1; }
 			else                                      { return 2; }
 		}
 		else { return -1; }  // game is not over
+	}
+
+	/*
+	for every tile of the grid:
+		if tile belongs to the otherPlayer:
+			for every tile around it w/i a distance of 2:
+				if able to play (i.e. grid[r][c] == 0): return false
+	return true
+	 */
+	private boolean blockedOtherPlayer() {
+		for (int grid_r = 0; grid_r < grid.length; grid_r++) {
+			for (int grid_c = 0; grid_c < grid[0].length; grid_c++) {
+
+				if ( grid[grid_r][grid_c] == otherPlayer ) {
+
+					for (int r = grid_r -2; r <= grid_r +2; r++) {
+						for (int c = grid_c - 2; c <= grid_c + 2; c++) {
+
+							if (isInGrid(r, c) && grid[r][c] == 0) {
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	public int[][] getGrid() {
